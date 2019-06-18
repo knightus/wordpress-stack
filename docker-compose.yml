@@ -1,0 +1,63 @@
+version: "3.4"
+services:
+  nginx-proxy:
+    container_name: ${CONTAINER_PREFIX}-nginx-proxy
+    build:
+      context: ./services/nginx-proxy
+      args:
+      - IMAGE_REPOSITORY=${NGINX_PROXY_IMAGE_REPOSITORY}
+      - IMAGE_TAG=${NGINX_PROXY_IMAGE_TAG}
+    ports:
+    - 80:80
+    - 443:443
+    volumes:
+    - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    networks:
+    - nginx-proxy
+
+  mysql:
+    container_name: ${CONTAINER_PREFIX}-mysql
+    build:
+      context: ./services/mysql
+      args:
+      - IMAGE_REPOSITORY=${MYSQL_IMAGE_REPOSITORY}
+      - IMAGE_TAG=${MYSQL_IMAGE_TAG}
+    volumes:
+    - mysql-data:/var/lib/mysql
+    - ./services/mysql/conf.d:/etc/mysql/conf.d
+    networks:
+    - backend
+    environment:
+    - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    - MYSQL_DATABASE=${MYSQL_DATABASE}
+    - MYSQL_USER=${MYSQL_USER}
+    - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+  wordpress:
+    container_name: ${CONTAINER_PREFIX}-wordpress
+    build:
+      context: ./services/wordpress
+      args:
+      - IMAGE_REPOSITORY=${WORDPRESS_IMAGE_REPOSITORY}
+      - IMAGE_TAG=${WORDPRESS_IMAGE_TAG}
+    networks:
+    - backend
+    - nginx-proxy
+    environment:
+    - VIRTUAL_HOST=${WORDPRESS_URL}
+    - VIRTUAL_PORT=${WORDPRESS_PORT}
+    - WORDPRESS_DB_HOST=mysql:${MYSQL_PORT}
+    - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
+    - WORDPRESS_DB_USER=${MYSQL_USER}
+    - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+
+volumes:
+  mysql-data:
+    driver: local
+
+networks:
+  nginx-proxy:
+    external:
+      name: nginx-proxy
+  backend:
+    driver: bridge
