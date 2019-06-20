@@ -1,0 +1,4 @@
+ARG IMAGE_REPOSITORY=phpmyadmin/phpmyadmin
+ARG IMAGE_TAG=fpm-alpine
+
+FROM ${IMAGE_REPOSITORY}:${IMAGE_TAG}
