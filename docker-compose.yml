@@ -55,6 +55,8 @@ services:
       args:
       - IMAGE_REPOSITORY=${WORDPRESS_IMAGE_REPOSITORY}
       - IMAGE_TAG=${WORDPRESS_IMAGE_TAG}
+    volumes:
+      - ./wp-content:/var/www/html/wp-content  
     networks:
     - backend
     - nginx-proxy
