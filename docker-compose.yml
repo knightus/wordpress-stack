@@ -33,6 +33,20 @@ services:
     - MYSQL_USER=${MYSQL_USER}
     - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
+  phpmyadmin:
+    container_name: ${CONTAINER_PREFIX}-phpmyadmin
+    build:
+      context: ./services/phpmyadmin
+      args:
+      - IMAGE_REPOSITORY=${PHPMYADMIN_IMAGE_REPOSITORY}
+      - IMAGE_TAG=${PHPMYADMIN_IMAGE_TAG}  
+    networks: 
+      - backend
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=${MYSQL_PORT}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+
   wordpress:
     container_name: ${CONTAINER_PREFIX}-wordpress
     build:
@@ -40,6 +54,8 @@ services:
       args:
       - IMAGE_REPOSITORY=${WORDPRESS_IMAGE_REPOSITORY}
       - IMAGE_TAG=${WORDPRESS_IMAGE_TAG}
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
     networks:
     - backend
     - nginx-proxy
